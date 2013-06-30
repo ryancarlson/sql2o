@@ -59,14 +59,14 @@ public class Connection {
         return sql2o;
     }
 
-    public Query createQuery(String queryText, String name){
-        // If postgresql, the default behaviour should be not to retur generated keys, as this will throw an exception on
-        // every query that does not create any new keys.
-        boolean returnGeneratedKeys = !(this.sql2o.quirksMode == QuirksMode.PostgreSQL);
-        return createQuery(queryText, name, returnGeneratedKeys);
-    }
+//    public Query createQuery(String queryText, String name){
+//        // If postgresql, the default behaviour should be not to retur generated keys, as this will throw an exception on
+//        // every query that does not create any new keys.
+//        boolean returnGeneratedKeys = !(this.sql2o.quirksMode == QuirksMode.PostgreSQL);
+//        return createQuery(queryText, name, returnGeneratedKeys);
+//    }
 
-    public Query createQuery(String queryText, String name, boolean returnGeneratedKeys){
+    public Query createQuery(String queryText, String name){
 
         try {
             if (this.getJdbcConnection().isClosed()){
@@ -76,16 +76,12 @@ public class Connection {
             throw new RuntimeException(e);
         }
 
-        Query q = new Query(this, queryText, name, returnGeneratedKeys);
+        Query q = new Query(this, queryText, name);
         return q;
     }
     
     public Query createQuery(String queryText){
         return createQuery(queryText, null);
-    }
-
-    public Query createQuery(String queryText, boolean returnGeneratedKeys) {
-        return createQuery(queryText, null, returnGeneratedKeys);
     }
 
     public Sql2o rollback(){

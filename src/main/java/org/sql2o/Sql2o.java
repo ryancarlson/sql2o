@@ -121,33 +121,10 @@ public class Sql2o {
      * Creates a {@link Query}
      * @param query the sql query string
      * @param name name of query. Only used for logging purposes
-     * @param returnGeneratedKeys boolean value indicating if the database should return any generated keys.
      * @return the {@link Query} instance
      */
-    public Query createQuery(String query, String name, boolean returnGeneratedKeys) {
-        return new Connection(this).createQuery(query, name, returnGeneratedKeys);
-    }
-
-    /**
-     * Creates a {@link Query}
-     * @param query the sql query string
-     * @param returnGeneratedKeys boolean value indicating if the database should return any generated keys.
-     * @return the {@link Query} instance
-     */
-    public Query createQuery(String query, boolean returnGeneratedKeys) {
-        return createQuery(query, null, returnGeneratedKeys);
-    }
-
-    /**
-     * Creates a {@link Query}
-     * @param query the sql query string
-     * @param name name of query. Only used for logging purposes
-     * @return the {@link Query} instance
-     */
-    public Query createQuery(String query, String name){
-
-        Connection connection = new Connection(this);
-        return connection.createQuery(query, name);
+    public Query createQuery(String query, String name) {
+        return new Connection(this).createQuery(query, name);
     }
 
     /**
@@ -155,7 +132,7 @@ public class Sql2o {
      * @param query the sql query string
      * @return the {@link Query} instance
      */
-    public Query createQuery(String query){
+    public Query createQuery(String query) {
         return createQuery(query, null);
     }
 
