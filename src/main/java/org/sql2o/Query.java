@@ -8,11 +8,11 @@ import org.sql2o.converters.Converter;
 import org.sql2o.converters.ConverterException;
 import org.sql2o.data.Table;
 import org.sql2o.data.TableFactory;
+import org.sql2o.parameters.ParameterSetter;
 import org.sql2o.reflection.Pojo;
 import org.sql2o.reflection.PojoMetadata;
 import org.sql2o.tools.NamedParameterStatement;
 
-import java.lang.reflect.Method;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
@@ -24,133 +24,129 @@ public class Query {
 
     private final Logger logger = LoggerFactory.getLogger(Query.class);
 
-    public Query(Connection connection, String queryText, String name, boolean returnGeneratedKeys) {
+    public Query(Connection connection, String queryText, String name) {
         this.connection = connection;
         this.name = name;
-        this.returnGeneratedKeys = returnGeneratedKeys;
-
-        try{
-            statement = new NamedParameterStatement(connection.getJdbcConnection(), queryText, returnGeneratedKeys);
-        }
-        catch(Exception ex){
-            throw new RuntimeException(ex);
-        }
+        this.queryText = queryText;
 
         this.setColumnMappings(connection.getSql2o().getDefaultColumnMappings());
         this.caseSensitive = connection.getSql2o().isDefaultCaseSensitive();
-        this.methodsMap = new HashMap<String, Method>();
+
+        this.parameterSetters = new HashMap<String, ParameterSetter>();
     }
 
     private Connection connection;
 
     private Map<String, String> caseSensitiveColumnMappings;
     private Map<String, String> columnMappings;
-    private Map<String, Method> methodsMap;
+    
+    private String queryText;
 
-    private NamedParameterStatement statement;
+    private NamedParameterStatement statement = null;
 
     private boolean caseSensitive;
     
     private final String name;
-    private boolean returnGeneratedKeys;
 
-    public Query addParameter(String name, Object value){
-        try{
-            statement.setObject(name, value);
-        }
-        catch(SQLException ex){
-            throw new RuntimeException(ex);
-        }
-        return this;
-    }
-    
-    public Query addParameter(String name, int value){
-        try{
-            statement.setInt(name, value);
-        }
-        catch (SQLException ex){
-            throw new Sql2oException(ex);
-        }
-        return this;
-    }
+    private Map<String, ParameterSetter> parameterSetters;
 
-    public Query addParameter(String name, Integer value){
-        try{
-            if (value == null){
-                statement.setNull(name, Types.INTEGER);
-            }else{
-                statement.setInt(name, value);
+    public Query addParameter(final String name, final Object value){
+        this.parameterSetters.put(name, new ParameterSetter() {
+            public void setParameterValue(NamedParameterStatement statement) throws SQLException {
+                statement.setObject(name, value);
             }
-        }
-        catch(SQLException ex){
-            throw new RuntimeException(ex);
-        }
-        return this;
-    }
+        });
 
-    public Query addParameter(String name, long value){
-        try{
-            statement.setLong(name, value);
-        }
-        catch(SQLException ex){
-            throw new RuntimeException(ex);
-        }
         return this;
     }
     
-    public Query addParameter(String name, Long value){
-        try{
-            if (value == null){
-                statement.setNull(name, Types.INTEGER);
-            } else {
+    public Query addParameter(final String name, final int value){
+        this.parameterSetters.put(name, new ParameterSetter() {
+            public void setParameterValue(NamedParameterStatement statement) throws SQLException {
+                statement.setInt(name, value);
+
+            }
+        });
+
+        return this;
+    }
+
+    public Query addParameter(final String name, final Integer value){
+        this.parameterSetters.put(name, new ParameterSetter() {
+            public void setParameterValue(NamedParameterStatement statement) throws SQLException {
+                if (value == null){
+                    statement.setNull(name, Types.INTEGER);
+                }else{
+                    statement.setInt(name, value);
+                }
+            }
+        });
+
+        return this;
+    }
+
+    public Query addParameter(final String name, final long value){
+        this.parameterSetters.put(name, new ParameterSetter() {
+            public void setParameterValue(NamedParameterStatement statement) throws SQLException {
                 statement.setLong(name, value);
             }
-        }
-        catch (SQLException ex){
-            throw new Sql2oException(ex);
-        }
+        });
+
+        return this;
+    }
+    
+    public Query addParameter(final String name, final Long value){
+        this.parameterSetters.put(name, new ParameterSetter() {
+            public void setParameterValue(NamedParameterStatement statement) throws SQLException {
+                if (value == null){
+                    statement.setNull(name, Types.INTEGER);
+                } else {
+                    statement.setLong(name, value);
+                }
+            }
+        });
+
         return this;
     }
 
-    public Query addParameter(String name, String value){
-        try{
-            if (value == null){
-                statement.setNull(name, Types.VARCHAR);
-            }else{
-                statement.setString(name, value);
+    public Query addParameter(final String name, final String value){
+        this.parameterSetters.put(name, new ParameterSetter() {
+            public void setParameterValue(NamedParameterStatement statement) throws SQLException {
+                if (value == null) {
+                    statement.setNull(name, Types.VARCHAR);
+                } else {
+                    statement.setString(name, value);
+                }
             }
-        }
-        catch(Exception ex){
-            throw new RuntimeException(ex);
-        }
+        });
+
         return this;
     }
 
-    public Query addParameter(String name, Timestamp value){
-        try{
-            if (value == null){
-                statement.setNull(name, Types.TIMESTAMP);
-            } else {
-                statement.setTimestamp(name, value);
+    public Query addParameter(final String name, final Timestamp value){
+        this.parameterSetters.put(name, new ParameterSetter() {
+            public void setParameterValue(NamedParameterStatement statement) throws SQLException {
+                if (value == null){
+                    statement.setNull(name, Types.TIMESTAMP);
+                } else {
+                    statement.setTimestamp(name, value);
+                }
             }
-        }
-        catch(Exception ex){
-            throw new RuntimeException(ex);
-        }
+        });
+
         return this;
     }
 
-    public Query addParameter(String name, Date value){
-        try{
-            if (value == null){
-                statement.setNull(name, Types.DATE);
-            } else {
-                statement.setDate(name, value);
+    public Query addParameter(final String name, final Date value){
+        this.parameterSetters.put(name, new ParameterSetter() {
+            public void setParameterValue(NamedParameterStatement statement) throws SQLException {
+                if (value == null){
+                    statement.setNull(name, Types.DATE);
+                } else {
+                    statement.setDate(name, value);
+                }
             }
-        }
-        catch (Exception ex){
-            throw new RuntimeException(ex);
-        }
+        });
 
         return this;
     }
@@ -167,16 +163,17 @@ public class Query {
         }
     }
 
-    public Query addParameter(String name, Time value){
-        try {
-            if (value == null){
-                statement.setNull(name, Types.TIME);
-            } else {
-                statement.setTime(name,value);
+    public Query addParameter(final String name, final Time value){
+        this.parameterSetters.put(name, new ParameterSetter() {
+            public void setParameterValue(NamedParameterStatement statement) throws SQLException {
+                if (value == null){
+                    statement.setNull(name, Types.TIME);
+                } else {
+                    statement.setTime(name,value);
+                }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        });
+
         return this;
     }
 
@@ -207,9 +204,15 @@ public class Query {
         return name;
     }
 
+    public String getQueryText() {
+        return queryText;
+    }
+
     public <T> List<T> executeAndFetch(Class returnType){
         List list = new ArrayList();
         PojoMetadata metadata = new PojoMetadata(returnType, this.isCaseSensitive(), this.getColumnMappings());
+        createStatement(false);
+        applyParameters();
         try{
             //java.util.Date st = new java.util.Date();
             long start = System.currentTimeMillis();
@@ -240,7 +243,7 @@ public class Query {
             rs.close();
             long afterClose = System.currentTimeMillis();
 
-            logger.info("total: {} ms, execution: {} ms, reading and parsing: {} ms; executed [{}]", new Object[]{
+            logger.debug("total: {} ms, execution: {} ms, reading and parsing: {} ms; executed [{}]", new Object[]{
                     afterClose - start, 
                     afterExecQuery-start, 
                     afterClose - afterExecQuery, 
@@ -270,13 +273,15 @@ public class Query {
     public Table executeAndFetchTable(){
         ResultSet rs;
         long start = System.currentTimeMillis();
+        createStatement(false);
+        applyParameters();
         try {
             rs = statement.executeQuery();
             long afterExecute = System.currentTimeMillis();
             Table table = TableFactory.createTable(rs, this.isCaseSensitive(), this.connection.getSql2o().quirksMode);
             long afterClose = System.currentTimeMillis();
             
-            logger.info("total: {} ms, execution: {} ms, reading and parsing: {} ms; executed fetch table [{}]", new Object[]{
+            logger.debug("total: {} ms, execution: {} ms, reading and parsing: {} ms; executed fetch table [{}]", new Object[]{
                 afterClose - start, 
                 afterExecute-start, 
                 afterClose - afterExecute, 
@@ -291,13 +296,15 @@ public class Query {
         }
     }
 
-    public Connection executeUpdate(){
+    public Connection executeUpdate(boolean returnGeneratedKeys){
         long start = System.currentTimeMillis();
+        createStatement(returnGeneratedKeys);
+        applyParameters();
         try{
 
             this.connection.setResult(statement.executeUpdate());
-            this.connection.setKeys(this.returnGeneratedKeys ? statement.getStatement().getGeneratedKeys() : null);
-            connection.setCanGetKeys(this.returnGeneratedKeys);
+            this.connection.setKeys(returnGeneratedKeys ? statement.getStatement().getGeneratedKeys() : null);
+            connection.setCanGetKeys(returnGeneratedKeys);
         }
         catch(SQLException ex){
             this.connection.onException();
@@ -308,7 +315,7 @@ public class Query {
         }
 
         long end = System.currentTimeMillis();
-        logger.info("total: {} ms; executed update [{}]", new Object[]{
+        logger.debug("total: {} ms; executed update [{}]", new Object[]{
             end - start, 
             this.getName() == null ? "No name" : this.getName()
         });
@@ -316,14 +323,20 @@ public class Query {
         return this.connection;
     }
 
+    public Connection executeUpdate(){
+        return executeUpdate(false);
+    }
+
     public Object executeScalar(){
         long start = System.currentTimeMillis();
+        createStatement(false);
+        applyParameters();
         try {
-            ResultSet rs = this.statement.executeQuery();
+            ResultSet rs = statement.executeQuery();
             if (rs.next()){
                 Object o = getRSVal(rs, 1);
                 long end = System.currentTimeMillis();
-                logger.info("total: {} ms; executed scalar [{}]", new Object[]{
+                logger.debug("total: {} ms; executed scalar [{}]", new Object[]{
                     end - start, 
                     this.getName() == null ? "No name" : this.getName()
                 });
@@ -359,14 +372,16 @@ public class Query {
     public <T> List<T> executeScalarList(){
         long start = System.currentTimeMillis();
         List<T> list = new ArrayList<T>();
+        createStatement(false);
+        applyParameters();
         try{
-            ResultSet rs = this.statement.executeQuery();
+            ResultSet rs = statement.executeQuery();
             while(rs.next()){
                 list.add((T)getRSVal(rs,1));
             }
 
             long end = System.currentTimeMillis();
-            logger.info("total: {} ms; executed scalar list [{}]", new Object[]{
+            logger.debug("total: {} ms; executed scalar list [{}]", new Object[]{
                 end - start,
                 this.getName() == null ? "No name" : this.getName()
             });
@@ -385,7 +400,11 @@ public class Query {
     /************** batch stuff *******************/
 
     public Query addToBatch(){
+        if (statement == null) {
+            createStatement(false);
+        }
         try {
+            applyParameters();
             statement.addBatch();
         } catch (SQLException e) {
             throw new Sql2oException("Error while adding statement to batch", e);
@@ -397,7 +416,7 @@ public class Query {
     public Connection executeBatch() throws Sql2oException {
         long start = System.currentTimeMillis();
         try {
-            connection.setBatchResult( statement.executeBatch() );
+            connection.setBatchResult(statement.executeBatch());
         }
         catch (Throwable e) {
             this.connection.onException();
@@ -408,7 +427,7 @@ public class Query {
         }
 
         long end = System.currentTimeMillis();
-        logger.info("total: {} ms; executed batch [{}]", new Object[]{
+        logger.debug("total: {} ms; executed batch [{}]", new Object[]{
             end - start,
             this.getName() == null ? "No name" : this.getName()
         });
@@ -467,6 +486,26 @@ public class Query {
         }
 
         return o;
+    }
+    
+    private void createStatement(boolean returnGeneratedKeys) {
+
+        try{
+            this.statement = new NamedParameterStatement(connection.getJdbcConnection(), this.getQueryText(), returnGeneratedKeys);
+        }
+        catch(Exception ex){
+            throw new Sql2oException(ex);
+        }
+    }
+
+    private void applyParameters() {
+        try {
+            for (ParameterSetter paramSetter : this.parameterSetters.values()) {
+                paramSetter.setParameterValue(statement);
+            }
+        } catch(SQLException ex) {
+            throw new Sql2oException(ex);
+        }
     }
 
 }

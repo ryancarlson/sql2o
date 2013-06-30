@@ -322,13 +322,13 @@ public class Sql2oTest {
 //            assertTrue(ex.getMessage().contains("executeUpdate(true)"));
 //        }
 
-        Integer key = (Integer)sql2o.createQuery(insertSql).addParameter("val", "something").executeUpdate().getKey();
+        Integer key = (Integer)sql2o.createQuery(insertSql).addParameter("val", "something").executeUpdate(true).getKey();
 
         assertNotNull(key);
         assertTrue(key >= 0);
 
         String multiInsertSql = "insert into get_keys_test(value) select 'a val' col1 from (values(0)) union select 'another val' col1 from (values(0))";
-        Object[] keys = sql2o.createQuery(multiInsertSql).executeUpdate().getKeys();
+        Object[] keys = sql2o.createQuery(multiInsertSql).executeUpdate(true).getKeys();
 
         assertNotNull(keys);
         assertTrue(keys.length > 0);
@@ -540,7 +540,7 @@ public class Sql2oTest {
         sql2o.runInTransaction(new StatementRunnable() {
             public void run(Connection connection, Object argument) throws Throwable {
                 Integer id = connection.createQuery("insert into runinsidetransactiontable(value) values(:value)")
-                    .addParameter("value", argument).executeUpdate().getKey(Integer.class);
+                    .addParameter("value", argument).executeUpdate(true).getKey(Integer.class);
                 
                 String insertedValue = connection.createQuery("select value from runinsidetransactiontable where id = :id").addParameter("id", id).executeScalar(String.class);
                 assertEquals("argument test", insertedValue);
