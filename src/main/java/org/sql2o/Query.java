@@ -13,6 +13,8 @@ import org.sql2o.reflection.Pojo;
 import org.sql2o.reflection.PojoMetadata;
 import org.sql2o.tools.NamedParameterStatement;
 
+import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
@@ -57,6 +59,16 @@ public class Query {
             }
         });
 
+        return this;
+    }
+
+    public Query addParameter(String name, InputStream value){
+        try{
+            statement.setInputStream(name, value);
+        }
+        catch(SQLException ex){
+            throw new RuntimeException(ex);
+        }
         return this;
     }
     
