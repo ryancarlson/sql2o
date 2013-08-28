@@ -13,9 +13,12 @@ import org.sql2o.reflection.Pojo;
 import org.sql2o.reflection.PojoMetadata;
 import org.sql2o.tools.NamedParameterStatement;
 
+import java.io.InputStream;
 import java.sql.*;
-import java.sql.Date;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a sql2o statement. With sql2o, all statements are instances of the Query class.
@@ -57,6 +60,16 @@ public class Query {
             }
         });
 
+        return this;
+    }
+
+    public Query addParameter(String name, InputStream value){
+        try{
+            statement.setInputStream(name, value);
+        }
+        catch(SQLException ex){
+            throw new RuntimeException(ex);
+        }
         return this;
     }
     
