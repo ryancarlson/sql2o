@@ -1,5 +1,22 @@
 package org.sql2o;
 
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,13 +28,6 @@ import org.sql2o.data.TableFactory;
 import org.sql2o.reflection.Pojo;
 import org.sql2o.reflection.PojoMetadata;
 import org.sql2o.tools.NamedParameterStatement;
-
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.sql.*;
-import java.sql.Date;
-import java.util.*;
 
 /**
  * Represents a sql2o statement. With sql2o, all statements are instances of the Query class.
@@ -193,6 +203,17 @@ public class Query {
         return this;
     }
 
+    public Query addParameter(String name, JsonNode value) {
+    	try {
+    		String stringValue = new ObjectMapper().writeValueAsString(value);
+    		if(stringValue == null || stringValue.trim().length() == 0) stringValue="{}";
+    		return addParameter(name, (Object)stringValue);
+    	}
+    	catch(Exception e) {
+    		return addParameter(name, (Object) null);
+    	}
+    }
+    
     public Query addParameter(String name, DateTime value){
         Timestamp timestamp = value == null ? null : new Timestamp(value.toDate().getTime());
         return addParameter(name, timestamp);
