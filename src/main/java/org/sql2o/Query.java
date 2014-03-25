@@ -1,6 +1,7 @@
 package org.sql2o;
 
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Date;
@@ -28,6 +29,15 @@ import org.sql2o.data.TableFactory;
 import org.sql2o.reflection.Pojo;
 import org.sql2o.reflection.PojoMetadata;
 import org.sql2o.tools.NamedParameterStatement;
+import org.w3c.dom.Document;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * Represents a sql2o statement. With sql2o, all statements are instances of the Query class.
@@ -213,7 +223,20 @@ public class Query {
     		return addParameter(name, (Object) null);
     	}
     }
-    
+
+    public Query addParameter(String name, Document value) {
+        try {
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer transformer = tf.newTransformer();
+            StringWriter writer = new StringWriter();
+            transformer.transform(new DOMSource(value), new StreamResult(writer));
+            return addParameter(name, (Object)writer.getBuffer().toString());
+        }
+        catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public Query addParameter(String name, DateTime value){
         Timestamp timestamp = value == null ? null : new Timestamp(value.toDate().getTime());
         return addParameter(name, timestamp);

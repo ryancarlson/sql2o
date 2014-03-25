@@ -78,6 +78,14 @@ public class Convert {
         	logger.warn("Failed to initialize JsonNode. JsonNode converter not register");
         }
 
+        try {
+            Class<?> xmlDocumentClass = Class.forName("org.w3c.dom.Document");
+            registerConverter(xmlDocumentClass, new XmlConverter());
+        }
+        catch(ClassNotFoundException e) {
+            logger.warn("Failed to initialize Xml Document. Document converter not register");
+        }
+
     }
     
     public static Converter<?> getConverter(Class<?> clazz) throws ConverterException {
