@@ -1,5 +1,6 @@
 package org.sql2o.tools;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.sql.*;
 import java.util.HashMap;
@@ -265,6 +266,12 @@ public class NamedParameterStatement {
         }
     }
 
+    public void setBinary(String name, byte[] value) throws SQLException {
+        int[] indexes = getIndexes(name);
+        for (int index: indexes){
+            statement.setBinaryStream(index, new ByteArrayInputStream(value), value.length);
+        }
+    }
 
     /**
      * Returns the underlying statement.

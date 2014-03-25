@@ -178,6 +178,21 @@ public class Query {
         return this;
     }
 
+    public Query addParameter(String name, byte[] value){
+        try{
+            if(value == null){
+                statement.setNull(name, Types.BINARY);
+            } else {
+                statement.setBinary(name, value);
+            }
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return this;
+    }
+
     public Query addParameter(String name, java.util.Date value){
         Date sqlDate = value == null ? null : new Date(value.getTime());
         if (sqlDate != null && this.connection.getSql2o().quirksMode == QuirksMode.DB2){
