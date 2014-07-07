@@ -1,9 +1,7 @@
 package org.sql2o.converters;
 
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.postgresql.util.PGobject;
 
 public class JsonNodeConverter implements Converter<JsonNode> {
@@ -18,11 +16,9 @@ public class JsonNodeConverter implements Converter<JsonNode> {
 		if(PGobject.class.equals(val.getClass())) {
 			String jsonString = ((PGobject)val).getValue();
 			ObjectMapper mapper = new ObjectMapper();
-			JsonFactory factory = mapper.getJsonFactory(); // since 2.1 use mapper.getFactory() instead
 
 			try {
-				JsonParser parser = factory.createJsonParser(jsonString);
-				return mapper.readTree(parser);
+				return mapper.readTree(jsonString);
 			}
 			catch(Exception e) {
 				throw new ConverterException("Error parsing JSON", e);
@@ -32,11 +28,9 @@ public class JsonNodeConverter implements Converter<JsonNode> {
 		if(String.class.equals(val.getClass())) {
 			String jsonString = (String)val;
 			ObjectMapper mapper = new ObjectMapper();
-			JsonFactory factory = mapper.getJsonFactory(); // since 2.1 use mapper.getFactory() instead
 
 			try {
-				JsonParser parser = factory.createJsonParser(jsonString);
-				return mapper.readTree(parser);
+				return mapper.readTree(jsonString);
 			}
 			catch(Exception e) {
 				throw new ConverterException("Error parsing JSON", e);

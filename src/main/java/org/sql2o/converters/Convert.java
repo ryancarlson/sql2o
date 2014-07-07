@@ -71,7 +71,7 @@ public class Convert {
         registerConverter(UUID.class, new UUIDConverter());
         
         try {
-        	Class<?> jsonNodeClass = Class.forName("org.codehaus.jackson.JsonNode");
+        	Class<?> jsonNodeClass = Class.forName("com.fasterxml.jackson.databind.JsonNode");
         	registerConverter(jsonNodeClass, new JsonNodeConverter());
         }
         catch(ClassNotFoundException e) {
