@@ -68,8 +68,8 @@ public class Convert {
         registerConverter(InputStream.class, inputStreamConverter);
         registerConverter(ByteArrayInputStream.class, inputStreamConverter);
 
-		registerConverter(UUID.class, new UUIDConverter());
-		registerConverter(UUID[].class, new UUIDArrayConverter());
+        registerConverter(UUID.class, new UUIDConverter());
+        registerConverter(UUID[].class, new UUIDArrayConverter());
 
         try {
         	Class<?> jsonNodeClass = Class.forName("com.fasterxml.jackson.databind.JsonNode");
