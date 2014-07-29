@@ -266,7 +266,14 @@ public class NamedParameterStatement {
         }
     }
 
-    public void setBinary(String name, byte[] value) throws SQLException {
+	public void setArray(String name, Array value) throws SQLException {
+		int[] indexes = getIndexes(name);
+		for (int index: indexes){
+			statement.setArray(index, value);
+		}
+	}
+
+	public void setBinary(String name, byte[] value) throws SQLException {
         int[] indexes = getIndexes(name);
         for (int index: indexes){
             statement.setBinaryStream(index, new ByteArrayInputStream(value), value.length);

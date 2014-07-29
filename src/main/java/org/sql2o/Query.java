@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Array;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -143,21 +145,36 @@ public class Query {
         return this;
     }
 
-    public Query addParameter(String name, String value){
-        try{
-            if (value == null){
-                statement.setNull(name, Types.VARCHAR);
-            }else{
-                statement.setString(name, value);
-            }
-        }
-        catch(Exception ex){
-            throw new RuntimeException(ex);
-        }
-        return this;
-    }
+	public Query addParameter(String name, String value){
+		try{
+			if (value == null){
+				statement.setNull(name, Types.VARCHAR);
+			}else{
+				statement.setString(name, value);
+			}
+		}
+		catch(Exception ex){
+			throw new RuntimeException(ex);
+		}
+		return this;
+	}
 
-    public Query addParameter(String name, Timestamp value){
+	public Query addParameter(String name, UUID[] value){
+		try{
+			if (value == null){
+				statement.setNull(name, Types.ARRAY);
+			}else{
+				Array sqlArray = connection.getJdbcConnection().createArrayOf("uuid", value);
+				statement.setArray(name, sqlArray);
+			}
+		}
+		catch(Exception ex){
+			throw new RuntimeException(ex);
+		}
+		return this;
+	}
+
+	public Query addParameter(String name, Timestamp value){
         try{
             if (value == null){
                 statement.setNull(name, Types.TIMESTAMP);
@@ -362,11 +379,11 @@ public class Query {
             long afterClose = System.currentTimeMillis();
 
             logger.debug("total: {} ms, execution: {} ms, reading and parsing: {} ms; executed [{}]", new Object[]{
-                    afterClose - start, 
-                    afterExecQuery-start, 
-                    afterClose - afterExecQuery, 
-                    this.getName() == null ? "No name" : this.getName()
-                });
+					afterClose - start,
+					afterExecQuery - start,
+					afterClose - afterExecQuery,
+					this.getName() == null ? "No name" : this.getName()
+			});
         }
         catch(SQLException ex){
             throw new Sql2oException("Database error: " + ex.getMessage(), ex);
@@ -398,11 +415,11 @@ public class Query {
             long afterClose = System.currentTimeMillis();
             
             logger.debug("total: {} ms, execution: {} ms, reading and parsing: {} ms; executed fetch table [{}]", new Object[]{
-                afterClose - start, 
-                afterExecute-start, 
-                afterClose - afterExecute, 
-                this.getName() == null ? "No name" : this.getName()
-            });
+					afterClose - start,
+					afterExecute - start,
+					afterClose - afterExecute,
+					this.getName() == null ? "No name" : this.getName()
+			});
             
             return table;
         } catch (SQLException e) {
@@ -430,9 +447,9 @@ public class Query {
 
         long end = System.currentTimeMillis();
         logger.debug("total: {} ms; executed update [{}]", new Object[]{
-            end - start, 
-            this.getName() == null ? "No name" : this.getName()
-        });
+				end - start,
+				this.getName() == null ? "No name" : this.getName()
+		});
 
         return this.connection;
     }
@@ -445,9 +462,9 @@ public class Query {
                 Object o = getRSVal(rs, 1);
                 long end = System.currentTimeMillis();
                 logger.debug("total: {} ms; executed scalar [{}]", new Object[]{
-                    end - start, 
-                    this.getName() == null ? "No name" : this.getName()
-                });
+						end - start,
+						this.getName() == null ? "No name" : this.getName()
+				});
                 return o;
             }
             else{
@@ -488,9 +505,9 @@ public class Query {
 
             long end = System.currentTimeMillis();
             logger.debug("total: {} ms; executed scalar list [{}]", new Object[]{
-                end - start,
-                this.getName() == null ? "No name" : this.getName()
-            });
+					end - start,
+					this.getName() == null ? "No name" : this.getName()
+			});
 
             return list;
         }
@@ -530,9 +547,9 @@ public class Query {
 
         long end = System.currentTimeMillis();
         logger.debug("total: {} ms; executed batch [{}]", new Object[]{
-            end - start,
-            this.getName() == null ? "No name" : this.getName()
-        });
+				end - start,
+				this.getName() == null ? "No name" : this.getName()
+		});
 
         return this.connection;
     }
