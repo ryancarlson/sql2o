@@ -3,7 +3,6 @@ package org.sql2o.converters;
 import org.postgresql.jdbc4.Jdbc4Array;
 
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.UUID;
 
@@ -27,17 +26,14 @@ public class UUIDArrayConverter implements Converter<UUID[]>
 			{
 				ResultSet resultSet = jdbc4Array.getResultSet();
 
-				// get result set row count
-				resultSet.last();
-				UUID[] uuids = new UUID[resultSet.getRow()];
-				resultSet.beforeFirst();
+				UUID[] uuids = new UUID[rowCount(resultSet)];
 
 				// get uuid from last column in each row
-				for (int i = 0; resultSet.next(); i++)
+				int arrayIndices = 0;
+				while(resultSet.next())
 				{
-					ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-					String result = resultSet.getString(resultSetMetaData.getColumnCount());
-					uuids[i] = UUID.fromString(result);
+					String result = resultSet.getString(resultSet.getMetaData().getColumnCount());
+					uuids[arrayIndices++] = UUID.fromString(result);
 				}
 
 				return uuids;
@@ -50,5 +46,15 @@ public class UUIDArrayConverter implements Converter<UUID[]>
 
 		throw new ConverterException("Cannot convert type " + val.getClass().toString() + " to java.util.UUID[]");
 	}
-}
 
+	private int rowCount(ResultSet resultSet) throws SQLException
+	{
+		resultSet.last();
+
+		int rowCount = resultSet.getRow();
+
+		resultSet.beforeFirst();
+
+		return rowCount;
+	}
+}
