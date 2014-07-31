@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Array;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -263,7 +265,22 @@ public class Query {
         String strVal = value == null ? null : value.toString();
         return addParameter(name, strVal);
     }
-    
+
+    public Query addParameter(String name, UUID[] value){
+        try{
+            if (value == null){
+                statement.setNull(name, Types.ARRAY);
+            }else{
+                Array sqlArray = connection.getJdbcConnection().createArrayOf("uuid", value);
+                statement.setArray(name, sqlArray);
+            }
+        }
+        catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+        return this;
+    }
+
     public Query bind(Object bean){
         Class clazz = bean.getClass();
         Method[] methods = clazz.getDeclaredMethods();
