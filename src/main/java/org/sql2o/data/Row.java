@@ -1,6 +1,7 @@
 package org.sql2o.data;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDateTime;
 import org.sql2o.Sql2oException;
 import org.sql2o.converters.*;
 
@@ -119,7 +120,7 @@ public class Row {
     
     public DateTime getDateTime(int columnIndex){
         try {
-            return new JodaTimeConverter().convert(getObject(columnIndex));
+            return new JodaDateTimeConverter().convert(getObject(columnIndex));
         } catch (ConverterException e) {
             throw new Sql2oException("Could not convert column with index " + columnIndex + " to " + DateTime.class.toString());
         }
@@ -127,12 +128,28 @@ public class Row {
     
     public DateTime getDateTime(String columnName){
         try {
-            return new JodaTimeConverter().convert(getObject(columnName));
+            return new JodaDateTimeConverter().convert(getObject(columnName));
         } catch (ConverterException e) {
             throw new Sql2oException("Could not convert column with name " + columnName + " to " + DateTime.class.toString());
         }
     }
-    
+
+	public LocalDateTime getLocalDateTime(int columnIndex){
+		try {
+			return new JodaLocalDateTimeConverter().convert(getObject(columnIndex));
+		} catch (ConverterException e) {
+			throw new Sql2oException("Could not convert column with index " + columnIndex + " to " + DateTime.class.toString());
+		}
+	}
+
+	public LocalDateTime getLocalDateTime(String columnName){
+		try {
+			return new JodaLocalDateTimeConverter().convert(getObject(columnName));
+		} catch (ConverterException e) {
+			throw new Sql2oException("Could not convert column with name " + columnName + " to " + DateTime.class.toString());
+		}
+	}
+
     public String getString(int columnIndex){
         try {
             return new StringConverter().convert(getObject(columnIndex));

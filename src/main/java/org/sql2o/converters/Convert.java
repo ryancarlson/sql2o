@@ -55,10 +55,18 @@ public class Convert {
 
         try {
             Class<?> jodaTimeClass = Class.forName("org.joda.time.DateTime");
-            registerConverter(jodaTimeClass, new JodaTimeConverter());
+            registerConverter(jodaTimeClass, new JodaDateTimeConverter());
         } catch (ClassNotFoundException e) {
-            logger.warn("Failed to initialize Jodatime. Jodatime converter not registered");
+            logger.warn("Failed to initialize Joda DateTime. DateTime converter not registered");
         }
+
+		try {
+			Class<?> jodaLocalDateTimeClass = Class.forName("org.joda.time.LocalDateTime");
+			registerConverter(jodaLocalDateTimeClass, new JodaLocalDateTimeConverter());
+		} catch (ClassNotFoundException e) {
+			logger.warn("Failed to initialize Joda LocalDateTime. LocalDateTime converter not registered");
+		}
+
 
         ByteArrayConverter byteArrayConverter = new ByteArrayConverter();
         registerConverter(Byte[].class, byteArrayConverter);
