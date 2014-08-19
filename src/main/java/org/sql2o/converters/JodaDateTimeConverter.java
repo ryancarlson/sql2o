@@ -13,7 +13,7 @@ public class JodaDateTimeConverter implements Converter<DateTime> {
         }
         
         try{
-            return new DateTime(val);
+            return new DateTime(val, DateTimeZone.UTC);
         }
         catch(Throwable t){
             throw new ConverterException("Error while converting type " + val.getClass().toString() + " to joda DateTime", t);
