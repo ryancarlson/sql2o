@@ -67,11 +67,17 @@ public class Convert {
 			logger.warn("Failed to initialize Joda LocalDateTime. LocalDateTime converter not registered");
 		}
 
+		try {
+			Class<?> jodaDateTimeZoneClass = Class.forName("org.joda.time.DateTimeZone");
+			registerConverter(jodaDateTimeZoneClass, new JodaDateTimeZoneConverter());
+		} catch (ClassNotFoundException e) {
+			logger.warn("Failed to initialize Joda DateTimeZone. DateTimeZone converter not registered");
+		}
 
         ByteArrayConverter byteArrayConverter = new ByteArrayConverter();
         registerConverter(Byte[].class, byteArrayConverter);
         registerConverter(byte[].class, byteArrayConverter);
-
+`
         InputStreamConverter inputStreamConverter = new InputStreamConverter();
         registerConverter(InputStream.class, inputStreamConverter);
         registerConverter(ByteArrayInputStream.class, inputStreamConverter);

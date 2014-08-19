@@ -22,6 +22,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sql2o.converters.Convert;
@@ -260,6 +261,10 @@ public class Query {
         Timestamp timestamp = value == null ? null : new Timestamp(value.toDate().getTime());
         return addParameter(name, timestamp);
     }
+
+	public Query addParameter(String name, DateTimeZone value) {
+		return addParameter(name, value == null ? null : value.getID());
+	}
 
     public Query addParameter(String name, Enum value) {
         String strVal = value == null ? null : value.toString();
